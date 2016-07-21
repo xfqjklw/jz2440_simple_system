@@ -2,5 +2,5 @@
 
 void disable_watch_dog(void)
 {
-    WTCON = 0;
+    WTCON = 0; //test
 }
