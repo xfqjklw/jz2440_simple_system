@@ -2,5 +2,5 @@
 
 void disable_watch_dog(void)
 {
-    WTCON = 0; //just test for merge
+    WTCON = 0;
 }

@@ -21,7 +21,7 @@ Reset:
     bl  clock_init
     bl  memsetup
 
-	#ifdef OPENJTAG_DEBUG
+	#if OPENJTAG_DEBUG
   	bl copy_isr_talbe_to_sram
 	#else
 	/*if you want to debug on sdram,you should not copy code*/
@@ -58,7 +58,7 @@ irq:
     stmdb   sp!,    { r0-r12,lr }   
                                             
     ldr lr, =int_return             
-    ldr pc, =EINT_Handle            
+    ldr pc, =IRQ_Handle            
 	
 int_return:
     ldmia   sp!,    { r0-r12,pc }^ 

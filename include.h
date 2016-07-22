@@ -2,6 +2,8 @@
 
 #define VERSION "v0.1"
 
+#define UART_SEND_DMA 0
+
 /*****uart api*****/
 extern void uart0_init();
 

@@ -75,7 +75,7 @@ void copy_isr_talbe_to_sram()
 {
 	unsigned int *pdwSrc  = (unsigned int *)0x30000000;    
 	unsigned int *pdwDest = (unsigned int *)0;        
-	while (pdwSrc < (unsigned int *)0x30000020)    
+	while (pdwSrc < (unsigned int *)0x30000020)
 	{        
 		*pdwDest = *pdwSrc;        
 		pdwDest++;        

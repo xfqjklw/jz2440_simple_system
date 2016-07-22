@@ -10,9 +10,9 @@ int main()
 	printf("---------------------------------------\r\n");
 	printf("           system start %s             \r\n",VERSION);
 	printf("---------------------------------------\r\n");
-	
-	while(1)
+
+ 	while(1)
 	{
-	}
+ 	}
 	return 0;
 }

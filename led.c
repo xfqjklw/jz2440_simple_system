@@ -6,7 +6,8 @@
 
 void led_init()
 {
-	GPFCON = GPF4_out|GPF5_out|GPF6_out;	
+	GPFCON = GPF4_out|GPF5_out|GPF6_out;
+	GPFDAT |= (0x7<<4); //close all led       
 }
 
 int led_on(int num)

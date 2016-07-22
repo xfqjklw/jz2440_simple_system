@@ -1,36 +1,74 @@
+#include "include.h"
 #include "s3c24xx.h"
 
-void EINT_Handle()
+void EINT0_ISR()
 {
-    unsigned long oft = INTOFFSET;    
-	unsigned long val;        
+	GPFDAT |= (0x7<<4); //close all led  
+	GPFDAT &= ~(1<<4);  //opem led1  
+}
+
+
+void EINT2_ISR()
+{
+	GPFDAT |= (0x7<<4); //close all led       
+	GPFDAT &= ~(1<<5);  //open led2  
+}
+
+
+void EINT8_23_ISR()
+{	
+	if(EINTPEND & (1<<11))
+	{
+		GPFDAT |= (0x7<<4); //close all led            
+		GPFDAT &= ~(1<<6);  // open led3     	
+		//clear interrupt
+		EINTPEND = (1<<11);   // EINT8_23合用IRQ5	
+	}
+}
+
+#if UART_SEND_DMA
+extern int uartSendDmaEnd;
+#endif
+
+void DMA0_ISR()
+{
+	#if UART_SEND_DMA
+	uartSendDmaEnd = 1;
+	printf("uart dma send end\r\n");
+	#endif
+}
+
+void IRQ_Handle()
+{
+    unsigned long oft = INTOFFSET;
+	
 	switch( oft )    
-	{        
+	{   
+		
 		case 0:         
 		{               
-			GPFDAT |= (0x7<<4); //close all led  
-			GPFDAT &= ~(1<<4);  //opem led1    
+			EINT0_ISR();
 			break;        
 		}                
 		case 2:        
 		{               
-			GPFDAT |= (0x7<<4); //close all led       
-			GPFDAT &= ~(1<<5);  //open led2          
+			EINT2_ISR();        
 			break;        
 		}             
 		case 5:        
 		{              
-			GPFDAT |= (0x7<<4); //close all led            
-			GPFDAT &= ~(1<<6);  // open led3                          
+			EINT8_23_ISR();                     
 			break;        
-		}        
+		}     
+		case 17:
+		{
+			DMA0_ISR();
+			break;
+		}
 		default:            
 			break;   
 		}    
 	
-		//清中断    
-		if( oft == 5 )         
-			EINTPEND = (1<<11);   // EINT8_23合用IRQ5   
 		SRCPND = 1<<oft;    
 		INTPND = 1<<oft;
 		
