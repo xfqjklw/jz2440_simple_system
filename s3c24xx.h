@@ -39,7 +39,7 @@
 #define UTXH0               (*(volatile unsigned char *)0x50000020)
 #define URXH0               (*(volatile unsigned char *)0x50000024)
 #define UBRDIV0             (*(volatile unsigned long *)0x50000028)
-
+#define UFSTAT0				(*(volatile unsigned long *)0x50000018)
 
 /*interrupt registes*/
 #define SRCPND              (*(volatile unsigned long *)0x4A000000)

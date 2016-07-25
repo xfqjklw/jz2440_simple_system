@@ -7,9 +7,9 @@ int main()
 	led_init();
 	key_init();
 
-	printf("---------------------------------------\r\n");
-	printf("           system start %s             \r\n",VERSION);
-	printf("---------------------------------------\r\n");
+	printf("-------------------------------------------------\r\n");
+	printf("                system start %s               \r\n",VERSION);
+	printf("-------------------------------------------------\r\n");
 
  	while(1)
 	{
