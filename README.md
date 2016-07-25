@@ -15,4 +15,4 @@ set remote memory-write-packet-size fixed
 set remote memory-read-packet-size 1024
 set remote memory-read-packet-size fixed
 
-3.cpu frequencyset set 400MHZ
+3.cpu frequencyset set 400MHZ 
