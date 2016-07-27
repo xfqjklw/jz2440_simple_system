@@ -73,9 +73,9 @@ void copy_steppingstone_to_sdram()
 */
 void copy_isr_talbe_to_sram()
 {
-	unsigned int *pdwSrc  = (unsigned int *)0x30000000;    
-	unsigned int *pdwDest = (unsigned int *)0;        
-	while (pdwSrc < (unsigned int *)0x30000020)
+	unsigned int *pdwSrc  = (unsigned int *)0x30000000;
+	unsigned int *pdwDest = (unsigned int *)0;
+	while (pdwSrc < (unsigned int *)0x30000040)
 	{        
 		*pdwDest = *pdwSrc;        
 		pdwDest++;        

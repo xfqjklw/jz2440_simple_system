@@ -35,6 +35,19 @@ extern char uartRecvBuffer[17];
 #endif
 
 
+void TIMER0_ISR()
+{
+	printf("timer0 isr occur\r\n");
+
+
+}
+
+void TIMER1_ISR()
+{
+	printf("timer1 isr occur\r\n");
+
+}
+
 void DMA0_ISR()
 {
 	#if UART_SEND_DMA
@@ -71,15 +84,6 @@ void UART0_ISR()
 	}
 	#endif
 	
-	#if UART_FIFO_SEND_INT	
-	int i = 0;
-	
-	if(SUBSRCPND & (0x01<<1))  //send interrupt
-	{
- 		putc('S');
-		SUBSRCPND = (0x01<<1);   // clear uart0 sub rx interrupt
-	}
-	#endif
 }
 
 void IRQ_Handle()
@@ -104,6 +108,16 @@ void IRQ_Handle()
 			EINT8_23_ISR();                     
 			break;        
 		}     
+		case 10:
+		{
+			TIMER0_ISR();
+			break;
+		}
+		case 11:
+		{
+			TIMER1_ISR();
+			break;
+		}	
 		case 17:
 		{
 			DMA0_ISR();

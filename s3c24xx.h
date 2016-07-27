@@ -73,6 +73,9 @@
 #define	TCMPB0		(*(volatile unsigned long *)0x51000010)
 #define	TCNTO0		(*(volatile unsigned long *)0x51000014)
 
+#define	TCNTB1		(*(volatile unsigned long *)0x51000018)
+#define	TCMPB1		(*(volatile unsigned long *)0x5100001C)
+
 #define GSTATUS1    (*(volatile unsigned long *)0x560000B0)
 
 /*dma registers*/

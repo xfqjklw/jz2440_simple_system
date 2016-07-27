@@ -6,6 +6,8 @@ int main()
 	uart0_init();
 	led_init();
 	key_init();
+	//timer0_init();
+	//timer1_init();
 
 	printf("-------------------------------------------------\r\n");
 	printf("                system start %s               \r\n",VERSION);
