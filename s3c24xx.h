@@ -126,4 +126,25 @@
 #define DMASKTRIG3  (*(volatile unsigned long *)0x4B0000E0)
 
 
+/*rtc registers*/
+
+#define RTCCON		(*(volatile unsigned long *)0x57000040)
+#define TICNT		(*(volatile unsigned long *)0x57000044)
+#define RTCALM  	(*(volatile unsigned long *)0x57000050)
+
+#define ALMSEC		(*(volatile unsigned long *)0x57000054)
+#define ALMMIN		(*(volatile unsigned long *)0x57000058)
+#define ALMHOUR		(*(volatile unsigned long *)0x5700005C)
+#define ALMDATE		(*(volatile unsigned long *)0x57000060)
+#define ALMMON		(*(volatile unsigned long *)0x57000064)
+#define ALMYEAR		(*(volatile unsigned long *)0x57000068)
+
+#define BCDSEC 		(*(volatile unsigned long *)0x57000070)
+#define BCDMIN 		(*(volatile unsigned long *)0x57000074)
+#define BCDHOUR 	(*(volatile unsigned long *)0x57000078)
+#define BCDDATE 	(*(volatile unsigned long *)0x5700007C)
+#define BCDDAY 		(*(volatile unsigned long *)0x57000080)
+#define BCDMON 		(*(volatile unsigned long *)0x57000084)
+#define BCDYEAR 	(*(volatile unsigned long *)0x57000088)
+
 

@@ -15,3 +15,12 @@ extern void led_init();
 
 /*****key api*****/
 extern void key_init();
+
+/*****timer api*****/
+extern void timer0_init();
+extern void timer1_init();
+
+/*****watchdog******/
+extern void disable_watch_dog();
+
+

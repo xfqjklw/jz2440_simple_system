@@ -86,6 +86,16 @@ void UART0_ISR()
 	
 }
 
+void RTC_ISR()
+{
+	printf("alarm occur\r\n");
+}
+
+void TICK_ISR()
+{
+	printf("tick occur\r\n");
+}
+
 void IRQ_Handle()
 {
     unsigned long oft = INTOFFSET;
@@ -107,7 +117,12 @@ void IRQ_Handle()
 		{              
 			EINT8_23_ISR();                     
 			break;        
-		}     
+		}
+		case 8:
+		{
+			TICK_ISR();
+			break;
+		}
 		case 10:
 		{
 			TIMER0_ISR();
@@ -127,6 +142,10 @@ void IRQ_Handle()
 		{
 			UART0_ISR();
 			break;
+		}
+		case 30:
+		{
+			RTC_ISR();
 		}
 		default:            
 			break;   

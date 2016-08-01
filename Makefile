@@ -1,4 +1,4 @@
-objs := head.o nand.o main.o init.o interrupt.o led.o watchdog.o key.o uart.o timer.o printf/libc.a
+objs := head.o nand.o main.o init.o interrupt.o led.o watchdog.o key.o uart.o timer.o rtc.o printf/libc.a
 
 simple.bin: $(objs)
 	arm-linux-ld -Tsimple.lds -o simple_elf $^
