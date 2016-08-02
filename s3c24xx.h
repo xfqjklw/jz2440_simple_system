@@ -28,6 +28,10 @@
 #define GPHDAT              (*(volatile unsigned long *)0x56000074)
 #define GPHUP               (*(volatile unsigned long *)0x56000078)
 
+#define GPCCON    			(*(volatile unsigned long *)0x56000020)	
+#define GPCDAT    			(*(volatile unsigned long *)0x56000024)	
+#define GPCUP     			(*(volatile unsigned long *)0x56000028)	
+
 
 
 /*UART registers*/
@@ -146,5 +150,56 @@
 #define BCDDAY 		(*(volatile unsigned long *)0x57000080)
 #define BCDMON 		(*(volatile unsigned long *)0x57000084)
 #define BCDYEAR 	(*(volatile unsigned long *)0x57000088)
+
+/*misc registers*/
+#define MISCCR    	(*(volatile unsigned *)0x56000080)	
+
+/*usb registers*/
+#define FUNC_ADDR_REG     (*(volatile unsigned char *)0x52000140)	//Function address
+#define PWR_REG           (*(volatile unsigned char *)0x52000144)	//Power management
+#define EP_INT_REG        (*(volatile unsigned char *)0x52000148)	//EP Interrupt pending and clear
+#define USB_INT_REG       (*(volatile unsigned char *)0x52000158)	//USB Interrupt pending and clear
+#define EP_INT_EN_REG     (*(volatile unsigned char *)0x5200015c)	//Interrupt enable
+#define USB_INT_EN_REG    (*(volatile unsigned char *)0x5200016c)
+#define FRAME_NUM1_REG    (*(volatile unsigned char *)0x52000170)	//Frame number lower byte
+#define FRAME_NUM2_REG    (*(volatile unsigned char *)0x52000174)	//Frame number higher byte
+#define INDEX_REG         (*(volatile unsigned char *)0x52000178)	//Register index
+#define MAXP_REG          (*(volatile unsigned char *)0x52000180)	//Endpoint max packet
+#define EP0_CSR           (*(volatile unsigned char *)0x52000184)	//Endpoint 0 status
+#define IN_CSR1_REG       (*(volatile unsigned char *)0x52000184)	//In endpoint control status
+#define IN_CSR2_REG       (*(volatile unsigned char *)0x52000188)
+#define OUT_CSR1_REG      (*(volatile unsigned char *)0x52000190)	//Out endpoint control status
+#define OUT_CSR2_REG      (*(volatile unsigned char *)0x52000194)
+#define OUT_FIFO_CNT1_REG (*(volatile unsigned char *)0x52000198)	//Endpoint out write count
+#define OUT_FIFO_CNT2_REG (*(volatile unsigned char *)0x5200019c)
+#define EP0_FIFO          (*(volatile unsigned char *)0x520001c0)	//Endpoint 0 FIFO
+#define EP1_FIFO          (*(volatile unsigned char *)0x520001c4)	//Endpoint 1 FIFO
+#define EP2_FIFO          (*(volatile unsigned char *)0x520001c8)	//Endpoint 2 FIFO
+#define EP3_FIFO          (*(volatile unsigned char *)0x520001cc)	//Endpoint 3 FIFO
+#define EP4_FIFO          (*(volatile unsigned char *)0x520001d0)	//Endpoint 4 FIFO
+#define EP1_DMA_CON       (*(volatile unsigned char *)0x52000200)	//EP1 DMA interface control
+#define EP1_DMA_UNIT      (*(volatile unsigned char *)0x52000204)	//EP1 DMA Tx unit counter
+#define EP1_DMA_FIFO      (*(volatile unsigned char *)0x52000208)	//EP1 DMA Tx FIFO counter
+#define EP1_DMA_TTC_L     (*(volatile unsigned char *)0x5200020c)	//EP1 DMA total Tx counter
+#define EP1_DMA_TTC_M     (*(volatile unsigned char *)0x52000210)
+#define EP1_DMA_TTC_H     (*(volatile unsigned char *)0x52000214)
+#define EP2_DMA_CON       (*(volatile unsigned char *)0x52000218)	//EP2 DMA interface control
+#define EP2_DMA_UNIT      (*(volatile unsigned char *)0x5200021c)	//EP2 DMA Tx unit counter
+#define EP2_DMA_FIFO      (*(volatile unsigned char *)0x52000220)	//EP2 DMA Tx FIFO counter
+#define EP2_DMA_TTC_L     (*(volatile unsigned char *)0x52000224)	//EP2 DMA total Tx counter
+#define EP2_DMA_TTC_M     (*(volatile unsigned char *)0x52000228)
+#define EP2_DMA_TTC_H     (*(volatile unsigned char *)0x5200022c)
+#define EP3_DMA_CON       (*(volatile unsigned char *)0x52000240)	//EP3 DMA interface control
+#define EP3_DMA_UNIT      (*(volatile unsigned char *)0x52000244)	//EP3 DMA Tx unit counter
+#define EP3_DMA_FIFO      (*(volatile unsigned char *)0x52000248)	//EP3 DMA Tx FIFO counter
+#define EP3_DMA_TTC_L     (*(volatile unsigned char *)0x5200024c)	//EP3 DMA total Tx counter
+#define EP3_DMA_TTC_M     (*(volatile unsigned char *)0x52000250)
+#define EP3_DMA_TTC_H     (*(volatile unsigned char *)0x52000254)
+#define EP4_DMA_CON       (*(volatile unsigned char *)0x52000258)	//EP4 DMA interface control
+#define EP4_DMA_UNIT      (*(volatile unsigned char *)0x5200025c)	//EP4 DMA Tx unit counter
+#define EP4_DMA_FIFO      (*(volatile unsigned char *)0x52000260)	//EP4 DMA Tx FIFO counter
+#define EP4_DMA_TTC_L     (*(volatile unsigned char *)0x52000264)	//EP4 DMA total Tx counter
+#define EP4_DMA_TTC_M     (*(volatile unsigned char *)0x52000268)
+#define EP4_DMA_TTC_H     (*(volatile unsigned char *)0x5200026c)
 
 

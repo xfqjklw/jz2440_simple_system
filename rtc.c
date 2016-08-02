@@ -1,4 +1,5 @@
 #include "s3c24xx.h"
+#include "stdio.h"
 
 void rtc_init()
 {

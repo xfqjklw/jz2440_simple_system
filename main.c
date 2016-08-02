@@ -16,7 +16,10 @@ int main()
 	printf("                system start %s               \r\n",VERSION);
 	printf("-------------------------------------------------\r\n");
 	rtc_display();
-
+	
+	usb_device_bulk_init();
+	usb_device_bulk_process();
+	
  	while(1)
 	{
  	}

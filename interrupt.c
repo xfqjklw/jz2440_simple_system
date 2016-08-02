@@ -60,6 +60,11 @@ void DMA0_ISR()
 	#endif
 }
 
+void USBD_ISR()
+{
+	isr_usbd();
+}
+
 void UART0_ISR()
 {
 	#if UART_FIFO_RECV_INT
@@ -138,6 +143,11 @@ void IRQ_Handle()
 			DMA0_ISR();
 			break;
 		}
+		case 25:
+		{
+			USBD_ISR();
+			break;
+		}
 		case 28:
 		{
 			UART0_ISR();
@@ -151,7 +161,7 @@ void IRQ_Handle()
 			break;   
 		}    
 	
-		SRCPND = 1<<oft;    
+		SRCPND = 1<<oft;
 		INTPND = 1<<oft;
 		
 }
