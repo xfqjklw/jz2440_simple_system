@@ -21,6 +21,10 @@
 #define CLR_EP0_SETUP_END() 		EP0_CSR=( (ep0_csr & (~EP0_WR_BITS))|(EP0_SERVICED_SETUP_END) )
 #define CLR_EP0_SENT_STALL() 		EP0_CSR=( ep0_csr & (~EP0_WR_BITS)& (~EP0_SENT_STALL) )
 
+#define CLR_EP3_OUT_PKT_READY() 	OUT_CSR1_REG= (out_csr3 &(~ EPO_WR_BITS) &(~EPO_OUT_PKT_READY) ) 
+#define CLR_EP3_SENT_STALL()		OUT_CSR1_REG= (out_csr3 & (~EPO_WR_BITS) &(~EPO_SENT_STALL) )
+
+
 /*ep0 state*/
 #define EP0_STATE_INIT 			(1)
 
@@ -65,6 +69,48 @@
 
 #define EP0_OUT_PKT_READY        0x01  /* USB sets, MCU clears by setting SERVICED_OUT_PKT_RDY */
 #define EP0_IN_PKT_READY         0x02  /* MCU sets, USB clears after sending FIFO */
+
+//IN_CSR1
+#define EPI_IN_PKT_READY         0x01  
+#define EPI_UNDER_RUN		 0x04
+#define EPI_FIFO_FLUSH		 0x08
+#define EPI_SEND_STALL           0x10  
+#define EPI_SENT_STALL           0x20  
+#define EPI_CDT			 0x40	
+#define EPI_WR_BITS              (EPI_FIFO_FLUSH|EPI_IN_PKT_READY|EPI_CDT) 
+					//(EPI_FIFO_FLUSH) is preferred  (???)
+//IN_CSR2
+#define EPI_IN_DMA_INT_MASK	(1<<4)
+#define EPI_MODE_IN		(1<<5)
+#define EPI_MODE_OUT		(0<<5)
+#define EPI_ISO			(1<<6)
+#define EPI_BULK		(0<<6)
+#define EPI_AUTO_SET		(1<<7)
+
+//OUT_CSR1
+#define EPO_OUT_PKT_READY        0x01  
+#define EPO_OVER_RUN		 0x04  
+#define EPO_DATA_ERROR		 0x08  
+#define EPO_FIFO_FLUSH		 0x10
+#define EPO_SEND_STALL           0x20  
+#define EPO_SENT_STALL           0x40
+#define EPO_CDT			 0x80	
+#define EPO_WR_BITS              (EPO_FIFO_FLUSH|EPO_SEND_STALL|EPO_CDT)
+
+//OUT_CSR2
+#define EPO_OUT_DMA_INT_MASK	(1<<5)
+#define EPO_ISO		 	(1<<6)
+#define EPO_BULK	 	(0<<6)
+#define EPO_AUTO_CLR		(1<<7)
+
+//USB DMA control register
+#define UDMA_IN_RUN_OB		(1<<7)
+#define UDMA_IGNORE_TTC		(1<<7)
+#define UDMA_DEMAND_MODE	(1<<3)
+#define UDMA_OUT_RUN_OB		(1<<2)
+#define UDMA_OUT_DMA_RUN	(1<<2)
+#define UDMA_IN_DMA_RUN		(1<<1)
+#define UDMA_DMA_MODE_EN	(1<<0)
 
 // Standard bmRequestTyje (Direction) 
 #define HOST_TO_DEVICE              (0x00)

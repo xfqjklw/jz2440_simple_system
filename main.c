@@ -2,7 +2,6 @@
 
 int main()
 {    
-
 	uart0_init();
 	led_init();
 	key_init();
@@ -19,9 +18,10 @@ int main()
 	
 	usb_device_bulk_init();
 	usb_device_bulk_process();
-	
+
  	while(1)
 	{
+		
  	}
 	return 0;
 }

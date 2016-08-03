@@ -82,3 +82,15 @@ void copy_isr_talbe_to_sram()
 		pdwSrc++;    
 	}
 }
+
+/*
+*you should clean bss,if you don't do this,the global variable which set 0 don't be 0
+*/
+void clean_bss(void)
+{
+    extern int __bss_start, __bss_end;
+    int *p = &__bss_start;
+    
+    for (; p < &__bss_end; p++)
+        *p = 0;
+}

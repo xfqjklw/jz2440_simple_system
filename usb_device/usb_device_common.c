@@ -39,3 +39,16 @@ void RdPktEp0(U8 *buf,int num)
         buf[i]=(U8)EP0_FIFO;	
     }
 }
+
+void RdPktEp3(U8 *buf,int num)
+{
+    int i;
+    	
+    for(i=0;i<num;i++)
+    {
+        buf[i]=(U8)EP3_FIFO;	
+    }
+}
+
+
+

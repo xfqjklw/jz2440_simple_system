@@ -39,13 +39,12 @@ void TIMER0_ISR()
 {
 	printf("timer0 isr occur\r\n");
 
-
 }
 
 void TIMER1_ISR()
 {
 	printf("timer1 isr occur\r\n");
-
+	
 }
 
 void DMA0_ISR()
@@ -54,9 +53,17 @@ void DMA0_ISR()
 	uartSendDmaEnd = 1;
 	printf("uart dma send end\r\n");
 	#endif
+
 	#if UART_RECV_DMA	
 	printf("uart dma recv\r\n");
 	printf("%s\r\n",uartRecvBuffer);
+	#endif
+}
+
+void DMA2_ISR()
+{
+	#if USB_DEVICE_BULK_OUT_DMA
+	isr_dma2();
 	#endif
 }
 
@@ -107,7 +114,6 @@ void IRQ_Handle()
 	
 	switch( oft )    
 	{   
-		
 		case 0:         
 		{               
 			EINT0_ISR();
@@ -141,6 +147,11 @@ void IRQ_Handle()
 		case 17:
 		{
 			DMA0_ISR();
+			break;
+		}
+		case 19:
+		{
+			DMA2_ISR();
 			break;
 		}
 		case 25:

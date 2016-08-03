@@ -23,13 +23,20 @@ _fiq:					.word fiq
 .balignl 16,0xdeadbeef
 
 Reset:              
-    ldr sp, =4096                       
-    bl  disable_watch_dog
+    ldr sp, =4096        
+
+    #if OPENJTAG_DEBUG
+
+	#else
+   	bl  disable_watch_dog
     bl  clock_init
     bl  memsetup
+    #endif
+    
+    bl  clean_bss
     
 	#if OPENJTAG_DEBUG
-  	bl copy_isr_talbe_to_sram	
+  	bl copy_isr_talbe_to_sram
 	#else
 	/*if you want to debug on sdram,you should not copy code*/
     //bl  nand_init

@@ -1,8 +1,10 @@
+#include "include.h"
 #include "s3c24xx.h"
 #include "usb_device_common.h"
 
 #define EP3_PKT_SIZE 64
 #define EP0_PKT_SIZE 8	
+#define DMA_MAX_SIZE 128
 
 static const U8 descStr0[]={
     4,STRING_TYPE,LANGID_US_L,LANGID_US_H,  //codes representing languages
@@ -31,7 +33,26 @@ struct USB_CONFIGURATION_SET ConfigSet;
 struct USB_INTERFACE_GET InterfaceGet;
 struct USB_GET_STATUS StatusGet;
 
-int isUsbdSetConfiguration = 0;
+volatile int isUsbdSetConfiguration = 0;
+volatile unsigned int downloadFileSize = 0;
+volatile unsigned int downloadAddress = 0;
+volatile unsigned int downloadTotalSize = 0;
+
+U8 *downPt;
+int checkSum;
+void (*run)(void);
+
+void RdPktEp3_CheckSum(U8 *buf,int num)
+{
+    int i;
+	
+	
+    for(i=0;i<num;i++)
+    {
+        buf[i]=(U8)EP3_FIFO;
+        checkSum+=buf[i];
+    }
+}
 
 void usb_dev_bulk_config()
 {
@@ -42,19 +63,18 @@ void usb_dev_bulk_config()
     MAXP_REG = 0x01;		// MAXP = 8bytes
     EP0_CSR = (1<<6)|(1<<7);// clear OUT_PKT_RDY,clear SETUP_END
 	  
-	 /* ep3 */
+	/* ep3 */
     INDEX_REG = 3;			
-    MAXP_REG = 0x08;
-    IN_CSR1_REG = (1<<3)|(1<<6);
-    IN_CSR2_REG = (0<<5)|(1<<4);
-    OUT_CSR1_REG = (1<<7);
-    OUT_CSR2_REG = (0<<6)|(1<<5);
-    INDEX_REG=1;
+    MAXP_REG = 0x08;       			// MAXP = 64bytes
+    IN_CSR1_REG = (1<<3);//|(1<<6);  	//flush the packet in Input-related FIFO.   PID in packet will maintain DATA0
+    IN_CSR2_REG = (0<<5)|(1<<4);	//Configures Endpoint Direction as OUT  IN_DMA interrupt disable
+    //OUT_CSR1_REG = (1<<7);			//the data toggle sequence bit is reset to DATA0
+    OUT_CSR2_REG = (0<<6)|(1<<5);	//bulk mode,in dma mode out_pkt_rdy interrupt disable
 	
 	/*interrupt*/
 	/*
 	*The USB core has two interrupt registers(EP_INT_REG/USB_INT_REG). These registers act as status registers for the MCU when it is
-	*interrupted. The bits are cleared by writing a ‘1’ (not ‘0’) to each bit that was set.
+	*interrupted. The bits are cleared by writing a 1 to each bit that was set.
 	*/
 	EP_INT_REG = (1<<0)|(1<<1)|(1<<2)|(1<<3)|(1<<4);  //clear endpoint interrupt status register EP0~EP4
     USB_INT_REG = (1<<0)|(1<<1)|(1<<2);  			  //clear usb interrupt status register reset/resume/suspend
@@ -99,12 +119,12 @@ void usb_dev_bulk_desc_table_init()
 
 	//Standard interface descriptor
     descIf.bLength=0x9;
-    descIf.bDescriptorType=INTERFACE_TYPE;      
+    descIf.bDescriptorType=INTERFACE_TYPE;
     descIf.bInterfaceNumber=0x0;			//interface 0
     descIf.bAlternateSetting=0x0; 
     descIf.bNumEndpoints=1;					//# of endpoints except EP0
-    descIf.bInterfaceClass=0xff; 			
-    descIf.bInterfaceSubClass=0x0;  
+    descIf.bInterfaceClass=0xff;			
+    descIf.bInterfaceSubClass=0x0;
     descIf.bInterfaceProtocol=0x0;
     descIf.iInterface=0x0;					//interface string index 0 means null
 
@@ -117,7 +137,6 @@ void usb_dev_bulk_desc_table_init()
     descEndpt3.wMaxPacketSizeH=0x0;
     descEndpt3.bInterval=0x0; //not used 
 
-	
 }
 
 void Ep0Handler()
@@ -393,6 +412,58 @@ void Ep0Handler()
 	}
 }
 
+void Ep3Handler()
+{
+    U8 out_csr3;
+    int fifoCnt;
+	U8 tmpRecv[8];
+	
+    INDEX_REG = 3;
+	out_csr3 = OUT_CSR1_REG;	
+	
+    if(out_csr3 & EPO_OUT_PKT_READY)
+    {
+        fifoCnt = OUT_FIFO_CNT1_REG;
+		printf("EP3 fifoCnt=%d\r\n",fifoCnt);
+		
+        if(downloadFileSize == 0)
+        {
+        	downloadTotalSize = 0;
+			downloadTotalSize += fifoCnt;
+            RdPktEp3((U8 *)tmpRecv,8);
+			downloadAddress = *((U8 *)(tmpRecv+0))+(*((U8 *)(tmpRecv+1))<<8)+(*((U8 *)(tmpRecv+2))<<16)+(*((U8 *)(tmpRecv+3))<<24);
+			printf("downloadAddress=0x%x\r\n",downloadAddress);			
+			downPt = (U8 *)downloadAddress;
+			downloadFileSize = *((U8 *)(tmpRecv+4))+(*((U8 *)(tmpRecv+5))<<8)+(*((U8 *)(tmpRecv+6))<<16)+(*((U8 *)(tmpRecv+7))<<24);
+			printf("downloadFileSize=%d\r\n",downloadFileSize);
+			checkSum = 0;
+			RdPktEp3_CheckSum((U8 *)downPt,fifoCnt-8); //The first 8-bytes are deleted.	
+			downPt+=fifoCnt-8;
+
+			#if USB_DEVICE_BULK_OUT_DMA
+			INTMSK|=(0x01<<25); //close usb device interrupt useful? not sure
+            return;	
+			#endif
+		}
+		else
+		{	
+			//no dma mode		
+			RdPktEp3_CheckSum((U8 *)downPt,fifoCnt);	    
+            downPt+=fifoCnt;  //fifoCnt=64            
+			downloadTotalSize += fifoCnt;
+		}
+		
+		CLR_EP3_OUT_PKT_READY();
+	}
+
+	if(out_csr3 & EPO_SENT_STALL)
+    {   
+        DbgPrintf("[STALL]");
+        CLR_EP3_SENT_STALL();
+        return;
+    }	
+}
+
 void isr_usbd()
 {	
     U8 usbdIntpnd,epIntpnd;
@@ -427,9 +498,100 @@ void isr_usbd()
         Ep0Handler();
     }
 
+	if(epIntpnd & EP3_INT)
+    {
+		//DbgPrintf( "[EP3]");
+        EP_INT_REG = EP3_INT;
+        Ep3Handler();
+    }
 	INDEX_REG = saveIndexReg;
 }
 
+void ConfigEp3IntMode(void)
+{
+    INDEX_REG=3;
+    
+    DMASKTRIG2= (0<<1);  // EP3=DMA ch 2
+    //DMA channel off
+    OUT_CSR2_REG=OUT_CSR2_REG&~(EPO_AUTO_CLR/*|EPO_OUT_DMA_INT_MASK*/); 
+    //AUTOCLEAR off,interrupt_enabled (???)
+    EP3_DMA_UNIT=1;	
+    EP3_DMA_CON=0; 
+    // deamnd disable,out_dma_run=stop,in_dma_run=stop,DMA mode disable
+    //wait until DMA_CON is effective.
+    EP3_DMA_CON;
+    
+}
+
+void ClearEp3OutPktReady(void)
+{
+    U8 out_csr3;
+
+    INDEX_REG=3;
+    out_csr3= OUT_CSR1_REG;
+    CLR_EP3_OUT_PKT_READY();
+}
+
+void ConfigEp3DmaMode(unsigned int bufAddr,unsigned int count)
+{
+    int i;
+
+    printf("addr : 0x%x,count:%d\r\n", bufAddr,count);
+    count = count&0xfffff; 	//transfer size should be <1MB
+    OUT_CSR2_REG = OUT_CSR2_REG|EPO_AUTO_CLR|EPO_OUT_DMA_INT_MASK;  //EPO_AUTO_CLR need do here
+
+	INDEX_REG=3;
+	DISRCC2 = (1<<1)|(1<<0); //increased source is APB
+    DISRC2 = 0x520001cc; 	//src=APB,fixed,src=EP3_FIFO
+    DIDSTC2=(0<<1)|(0<<0);  //fixed dest is AHB
+    DIDST2=bufAddr;       	//dst=bufAddr
+    DCON2=(count)|((unsigned int)1<<31)|(0<<30)|(1<<29)|(0<<28)|(0<<27)|(4<<24)|(1<<23)|(0<<22)|(0<<20); 
+	
+    EP3_DMA_UNIT = 0x01; //DMA transfer unit=1byte
+    EP3_DMA_CON = UDMA_OUT_DMA_RUN|UDMA_DMA_MODE_EN;  //ep3 dma mode  run
+
+	DMASKTRIG2= (1<<1);    //start dma2
+
+}
+
+void isr_dma2()
+{
+    U8 out_csr3;
+	
+    U8 saveIndexReg=INDEX_REG;
+
+	printf("isr_dma2\r\n");
+
+    INDEX_REG=3;
+    out_csr3=OUT_CSR1_REG;
+	downloadTotalSize += DMA_MAX_SIZE;// 524288(10) = 0x80000;524288/1024 = 512
+	downPt += DMA_MAX_SIZE;
+	printf("downloadTotalSize = %d,downPt = 0x%x\r\n",downloadTotalSize,downPt);
+	if(downloadTotalSize >= downloadFileSize)
+	{
+        downloadTotalSize = downloadFileSize;
+        ConfigEp3IntMode();	
+		if(out_csr3& EPO_OUT_PKT_READY)
+        {
+            CLR_EP3_OUT_PKT_READY();
+        }
+		INTMSK|=(0x01<<19); //close dma2 interrupt  
+        INTMSK&=~(0x01<<25);//open usb device interrupt 
+	}
+	else
+	{
+		if((downloadFileSize - downloadTotalSize) > DMA_MAX_SIZE)
+		{
+			ConfigEp3DmaMode(downPt,DMA_MAX_SIZE); //config dma
+		}
+		else
+		{
+			ConfigEp3DmaMode(downPt,downloadFileSize-downloadTotalSize);
+		}
+	}
+		
+    INDEX_REG=saveIndexReg;
+}
 
 
 void usb_device_bulk_init()
@@ -443,10 +605,52 @@ void usb_device_bulk_init()
 }
 
 void usb_device_bulk_process()
-{
-	if(isUsbdSetConfiguration==0)
+{	
+	int first = 1;
+	
+	if(isUsbdSetConfiguration == 0)
     {
         printf("USB host is not connected yet.\r\n");
     }
+    while(downloadFileSize == 0)
+	{
+		if(first == 1 && isUsbdSetConfiguration == 1)
+		{
+			printf("USB host is connected. Waiting a download.\r\n");
+			first = 0;
+		}	
+	}
+	
+	
+	#if USB_DEVICE_BULK_OUT_DMA
+	INTMSK&=~(0x01<<19); 	// enable dma2 interrupt 
+    ClearEp3OutPktReady(); 	//clear OUT_PKT_RDY,beacuse data read finished
+	
+    if(downloadFileSize > EP3_PKT_SIZE)  //if downloadFileSize < EP3_PKT_SIZE don't use dma
+    {
+        if(downloadFileSize<=DMA_MAX_SIZE) //dma max size is 512k bytes,if downloadFileSize > 512bytes,need do another dma
+        {
+			printf("downloadFileSize<0x80000\r\n");
+            ConfigEp3DmaMode(downPt,downloadFileSize-downloadTotalSize); //config dma
+		}
+		else
+		{
+			ConfigEp3DmaMode(downPt,DMA_MAX_SIZE); //config dma
+		}
+	}
+	#endif
+
+	while(1)
+	{
+		if(downloadTotalSize >= downloadFileSize)
+		{
+			printf("USB download finished.\r\n");
+			INTMSK=0xffffffff;
+			printf("run address : 0x%x\r\n", downloadAddress);
+			run = (void (*)(void))downloadAddress;
+			run();
+		}
+	}
+
 	
 }

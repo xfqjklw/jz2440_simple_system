@@ -7,6 +7,9 @@
 #define UART_RECV_DMA 0
 #define UART_FIFO_RECV_INT 1  //use recv fifo and interrupt
 
+/*usb function*/
+#define USB_DEVICE_BULK_OUT_DMA 1
+
 /*uart api*/
 extern void uart0_init();
 
