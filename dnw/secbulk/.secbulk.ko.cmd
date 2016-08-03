@@ -1,0 +1,1 @@
+cmd_/home/jay/Code/JZ2440/dnw_for_linux/secbulk/secbulk.ko := ld -r -m elf_i386 -T ./scripts/module-common.lds --build-id  -o /home/jay/Code/JZ2440/dnw_for_linux/secbulk/secbulk.ko /home/jay/Code/JZ2440/dnw_for_linux/secbulk/secbulk.o /home/jay/Code/JZ2440/dnw_for_linux/secbulk/secbulk.mod.o
