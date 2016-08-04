@@ -24,6 +24,7 @@
 #define CLR_EP3_OUT_PKT_READY() 	OUT_CSR1_REG= (out_csr3 &(~ EPO_WR_BITS) &(~EPO_OUT_PKT_READY) ) 
 #define CLR_EP3_SENT_STALL()		OUT_CSR1_REG= (out_csr3 & (~EPO_WR_BITS) &(~EPO_SENT_STALL) )
 
+#define SET_EP1_IN_PKT_READY()  	IN_CSR1_REG= (( in_csr1 &(~ EPI_WR_BITS))| EPI_IN_PKT_READY )	
 
 /*ep0 state*/
 #define EP0_STATE_INIT 			(1)
@@ -282,5 +283,7 @@ extern void usb_dev_port_init();
 
 extern void WrPktEp0(U8 *buf,int num);
 extern void RdPktEp0(U8 *buf,int num);
+extern void WrPktEp1(U8 *buf,int num);
+extern void RdPktEp3(U8 *buf,int num);
 
 #endif

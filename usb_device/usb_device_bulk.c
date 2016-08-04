@@ -2,6 +2,7 @@
 #include "s3c24xx.h"
 #include "usb_device_common.h"
 
+#define EP1_PKT_SIZE 64
 #define EP3_PKT_SIZE 64
 #define EP0_PKT_SIZE 8	
 #define DMA_MAX_SIZE 128
@@ -28,6 +29,7 @@ struct USB_SETUP_DATA descSetup;
 struct USB_DEVICE_DESCRIPTOR descDev;
 struct USB_CONFIGURATION_DESCRIPTOR descConf;
 struct USB_INTERFACE_DESCRIPTOR descIf;
+struct USB_ENDPOINT_DESCRIPTOR descEndpt1;
 struct USB_ENDPOINT_DESCRIPTOR descEndpt3;
 struct USB_CONFIGURATION_SET ConfigSet;
 struct USB_INTERFACE_GET InterfaceGet;
@@ -41,6 +43,8 @@ volatile unsigned int downloadTotalSize = 0;
 U8 *downPt;
 int checkSum;
 void (*run)(void);
+
+U8 ep1Buf[12] = "123456789012";
 
 void RdPktEp3_CheckSum(U8 *buf,int num)
 {
@@ -62,13 +66,21 @@ void usb_dev_bulk_config()
 	INDEX_REG = 0;			//choose ep0
     MAXP_REG = 0x01;		// MAXP = 8bytes
     EP0_CSR = (1<<6)|(1<<7);// clear OUT_PKT_RDY,clear SETUP_END
-	  
+	
+    /* ep1 */
+    INDEX_REG = 1;
+    MAXP_REG = 0x08;					// MAXP = 64bytes
+    IN_CSR1_REG = (1<<3);//| (1<<6);		//FIFO_FLUSH =1,CLR_DATA_TOGGLE = 1
+    IN_CSR2_REG = (1<<5)|(1<<4)|(0<<6);	//MODE_IN = IN,IN_PKT_RDY interrupt is disable in dma mode,bulk
+    OUT_CSR1_REG = (1<<7);				// CLR_DATA_TOGGLE = 1
+    OUT_CSR2_REG = (0<<6)|(1<<5);		// in dma mode out_pkt_rdy interrupt disable,bulk
+	
 	/* ep3 */
-    INDEX_REG = 3;			
+    INDEX_REG = 3;	
     MAXP_REG = 0x08;       			// MAXP = 64bytes
     IN_CSR1_REG = (1<<3);//|(1<<6);  	//flush the packet in Input-related FIFO.   PID in packet will maintain DATA0
     IN_CSR2_REG = (0<<5)|(1<<4);	//Configures Endpoint Direction as OUT  IN_DMA interrupt disable
-    //OUT_CSR1_REG = (1<<7);			//the data toggle sequence bit is reset to DATA0
+    //OUT_CSR1_REG = (1<<7);		//the data toggle sequence bit is reset to DATA0
     OUT_CSR2_REG = (0<<6)|(1<<5);	//bulk mode,in dma mode out_pkt_rdy interrupt disable
 	
 	/*interrupt*/
@@ -109,7 +121,7 @@ void usb_dev_bulk_desc_table_init()
 	//Standard configuration descriptor
     descConf.bLength=0x9;
     descConf.bDescriptorType=CONFIGURATION_TYPE;
-    descConf.wTotalLengthL=0x19; 			//<cfg desc>+<if desc>+<endp3 desc>
+    descConf.wTotalLengthL=0x20; 			//<cfg desc>+<if desc>+<endp1 desc>+<endp3 desc>
     descConf.wTotalLengthH=0;
     descConf.bNumInterfaces=1;				//interface numbers
     descConf.bConfigurationValue=1;			//configuration index value
@@ -122,12 +134,21 @@ void usb_dev_bulk_desc_table_init()
     descIf.bDescriptorType=INTERFACE_TYPE;
     descIf.bInterfaceNumber=0x0;			//interface 0
     descIf.bAlternateSetting=0x0; 
-    descIf.bNumEndpoints=1;					//# of endpoints except EP0
+    descIf.bNumEndpoints=2;					//# of endpoints except EP0
     descIf.bInterfaceClass=0xff;			
     descIf.bInterfaceSubClass=0x0;
     descIf.bInterfaceProtocol=0x0;
     descIf.iInterface=0x0;					//interface string index 0 means null
 
+	//Standard endpoint1 descriptor
+	descEndpt1.bLength=0x7;    
+	descEndpt1.bDescriptorType=ENDPOINT_TYPE;		  
+	descEndpt1.bEndpointAddress=1|EP_ADDR_IN;	// 2400Xendpoint 1 is IN endpoint.
+	descEndpt1.bmAttributes=EP_ATTR_BULK;
+	descEndpt1.wMaxPacketSizeL=EP1_PKT_SIZE; //64
+	descEndpt1.wMaxPacketSizeH=0x0;
+	descEndpt1.bInterval=0x0; //not used
+	
 	//Standard endpoint3 descriptor
     descEndpt3.bLength=0x7;
     descEndpt3.bDescriptorType=ENDPOINT_TYPE;         
@@ -138,6 +159,8 @@ void usb_dev_bulk_desc_table_init()
     descEndpt3.bInterval=0x0; //not used 
 
 }
+
+
 
 void Ep0Handler()
 {	
@@ -324,7 +347,7 @@ void Ep0Handler()
 		{
 			//DbgPrintf("[GDC2]");
 			WrPktEp0((U8 *)&descIf+7,2); 
-			WrPktEp0((U8 *)&descEndpt3+0,6); 
+			WrPktEp0((U8 *)&descEndpt1+0,6); 
 			SET_EP0_IN_PKT_RDY();
 			ep0State=EP0_STATE_GD_CFG_3;
 			break;
@@ -333,12 +356,22 @@ void Ep0Handler()
 		case EP0_STATE_GD_CFG_3:
 		{
 	        //DbgPrintf("[GDC3]");
-	        WrPktEp0((U8 *)&descEndpt3+6,1);			
-			SET_EP0_INPKTRDY_DATAEND(); //zero length data packet data end 
- 	        ep0State=EP0_STATE_INIT;            
+	        WrPktEp0((U8 *)&descEndpt1+1,1);			
+	        WrPktEp0((U8 *)&descEndpt3+0,7);			
+			SET_EP0_IN_PKT_RDY(); //zero length data packet data end 
+ 	        ep0State=EP0_STATE_GD_CFG_4;            
 	        break;
 		}
 
+		case EP0_STATE_GD_CFG_4:
+		{
+			//DbgPrintf("[GDC4]");		
+	        //zero length data packet 
+	        SET_EP0_INPKTRDY_DATAEND();
+	        ep0State=EP0_STATE_INIT;            
+	        break;
+		}
+      
         //=== GET_DESCRIPTOR:STRING ===
 		case EP0_STATE_GD_STR_I0:
 		{	
@@ -410,6 +443,20 @@ void Ep0Handler()
         	break;
     	}	
 	}
+}
+
+void Ep1Handler()
+{
+    U8 in_csr1;
+
+    INDEX_REG=1;
+    in_csr1 = IN_CSR1_REG;
+
+    DbgPrintf("<1:%x]",in_csr1);
+	
+    WrPktEp1(ep1Buf,12);
+    SET_EP1_IN_PKT_READY(); 
+		
 }
 
 void Ep3Handler()
@@ -493,9 +540,16 @@ void isr_usbd()
 
 	if(epIntpnd & EP0_INT)
     {    	
-        //DbgPrintf( "[EP0]");
+        //DbgPrintf("[EP0]");
         EP_INT_REG = EP0_INT;  		//clear interrupt
         Ep0Handler();
+    }
+
+	if(epIntpnd & EP1_INT)
+    {
+        DbgPrintf("[EP1]");
+        EP_INT_REG = EP1_INT;  
+        Ep1Handler();
     }
 
 	if(epIntpnd & EP3_INT)
@@ -534,11 +588,10 @@ void ClearEp3OutPktReady(void)
 
 void ConfigEp3DmaMode(unsigned int bufAddr,unsigned int count)
 {
-    int i;
 
     printf("addr : 0x%x,count:%d\r\n", bufAddr,count);
     count = count&0xfffff; 	//transfer size should be <1MB
-    OUT_CSR2_REG = OUT_CSR2_REG|EPO_AUTO_CLR|EPO_OUT_DMA_INT_MASK;  //EPO_AUTO_CLR need do here
+    OUT_CSR2_REG = OUT_CSR2_REG|EPO_AUTO_CLR|EPO_OUT_DMA_INT_MASK;  //EPO_AUTO_CLR need do here OUT_PKT_RDY auto clear used in dma
 
 	INDEX_REG=3;
 	DISRCC2 = (1<<1)|(1<<0); //increased source is APB
@@ -562,8 +615,8 @@ void isr_dma2()
 
 	printf("isr_dma2\r\n");
 
-    INDEX_REG=3;
-    out_csr3=OUT_CSR1_REG;
+    INDEX_REG = 3;
+    out_csr3 = OUT_CSR1_REG;
 	downloadTotalSize += DMA_MAX_SIZE;// 524288(10) = 0x80000;524288/1024 = 512
 	downPt += DMA_MAX_SIZE;
 	printf("downloadTotalSize = %d,downPt = 0x%x\r\n",downloadTotalSize,downPt);
@@ -620,7 +673,6 @@ void usb_device_bulk_process()
 			first = 0;
 		}	
 	}
-	
 	
 	#if USB_DEVICE_BULK_OUT_DMA
 	INTMSK&=~(0x01<<19); 	// enable dma2 interrupt 

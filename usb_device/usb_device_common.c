@@ -50,5 +50,14 @@ void RdPktEp3(U8 *buf,int num)
     }
 }
 
+void WrPktEp1(U8 *buf,int num)
+{
+    int i;
+    	
+    for(i=0;i<num;i++)
+    {
+        EP1_FIFO=buf[i];	
+    }
+}
 
 
