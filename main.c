@@ -25,11 +25,9 @@ int main()
 	usb_device_mouse_init();
 	#endif
 
-	int i = 0;
  	while(1)
 	{	
-		UsbBulkEp1Handler();
-		for(i=0;i<1000000;i++);
+	
  	}
 	return 0;
 }
