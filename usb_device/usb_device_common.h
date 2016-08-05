@@ -14,6 +14,29 @@
 #define DbgPrintf(args...)
 #endif
 
+#define REQ_TYPE_MASK       (3<<5)
+#define STANDARD_REQ    0
+#define CLASS_REQ       (1)
+
+#define USB_CLASS_PER_INTERFACE		0	/* for DeviceClass */
+#define USB_CLASS_AUDIO			1
+#define USB_CLASS_COMM			2
+#define USB_CLASS_HID			3
+#define USB_CLASS_PHYSICAL		5
+#define USB_CLASS_STILL_IMAGE		6
+#define USB_CLASS_PRINTER		7
+#define USB_CLASS_MASS_STORAGE		8
+#define USB_CLASS_HUB			9
+#define USB_CLASS_CDC_DATA		0x0a
+#define USB_CLASS_CSCID			0x0b	/* chip+ smart card */
+#define USB_CLASS_CONTENT_SEC		0x0d	/* content security */
+#define USB_CLASS_VIDEO			0x0e
+#define USB_CLASS_WIRELESS_CONTROLLER	0xe0
+#define USB_CLASS_MISC			0xef
+#define USB_CLASS_APP_SPEC		0xfe
+#define USB_CLASS_VENDOR_SPEC		0xff
+
+
 #define CLR_EP0_OUT_PKT_RDY() 		EP0_CSR=( (ep0_csr & (~EP0_WR_BITS))| EP0_SERVICED_OUT_PKT_RDY )	
 #define CLR_EP0_OUTPKTRDY_DATAEND()	EP0_CSR=( (ep0_csr & (~EP0_WR_BITS))|(EP0_SERVICED_OUT_PKT_RDY|EP0_DATA_END) )	
 #define SET_EP0_IN_PKT_RDY() 		EP0_CSR=( (ep0_csr & (~EP0_WR_BITS))|(EP0_IN_PKT_READY) )	 
@@ -42,10 +65,12 @@
 #define EP0_STATE_GD_STR_I0	 	(30)  
 #define EP0_STATE_GD_STR_I1	 	(31)  
 #define EP0_STATE_GD_STR_I2	 	(32)  
+#define EP0_STATE_GD_STR_I3	 	(33)  
 
 #define EP0_STATE_GD_CFG_ONLY_0		(40)
 #define EP0_STATE_GD_CFG_ONLY_1		(41)
 
+#define EP0_HID_REPORT_DES_STR   (50)
 
 //USB_INT_REG / USB_INT_EN_REG
 #define SUSPEND_INT            	 0x01  
@@ -54,9 +79,9 @@
 
 //EP_INT_REG / EP_INT_EN_REG
 #define EP0_INT                	 0x01  // Endpoint 0, Control   
-#define EP1_INT                  0x02  // Endpoint 1, (Bulk-In) 
+#define EP1_INT                  0x02  // Endpoint 1, 
 #define EP2_INT                  0x04  // Endpoint 2 
-#define EP3_INT			 		 0x08  // Endpoint 3, (Bulk-Out)   
+#define EP3_INT			 		 0x08  // Endpoint 3,   
 #define EP4_INT			 		 0x10  // Endpoint 4
 
 #define EP0_SENT_STALL           0x04  /* USB sets */       
@@ -157,6 +182,14 @@
 #define STRING_TYPE                 (3)
 #define INTERFACE_TYPE              (4)
 #define ENDPOINT_TYPE               (5)
+#define HID_DESCRIPTION_TYPES		0x22  //in hid description type,set 0x22
+
+#define GET_REPORT       0x01
+#define GET_IDLE         0x02
+#define GET_PROTOCAL     0x03
+#define SET_REPORT       0x09
+#define SET_IDLE         0x0A
+#define SET_PROTOCAL     0x0B
 
 //configuration descriptor: bmAttributes 
 #define CONF_ATTR_DEFAULT	    	(0x80) //Spec 1.0 it was BUSPOWERED bit.
@@ -264,6 +297,18 @@ struct USB_ENDPOINT_DESCRIPTOR{
      U8 AlternateSetting;
  };
 
+ struct USB_HID_DESCRIPTOR{
+	 U8  bLength;
+	 U8  bDescriptorType;
+	 U8  bcdHIDL;	 
+	 U8  bcdHIDH;
+	 U8  bCountryCode;
+	 U8  bNumDescriptors;
+	 U8  bDescriptorType0;
+	 U8  bDescriptorLengthL;	 
+	 U8  bDescriptorLengthH;
+ };
+ 
 /*usb description*/
 extern struct USB_SETUP_DATA descSetup;
 extern struct USB_DEVICE_DESCRIPTOR descDev;
@@ -285,5 +330,9 @@ extern void WrPktEp0(U8 *buf,int num);
 extern void RdPktEp0(U8 *buf,int num);
 extern void WrPktEp1(U8 *buf,int num);
 extern void RdPktEp3(U8 *buf,int num);
+
+extern void ConfigEp3IntMode();
+extern void ClearEp3OutPktReady();
+extern void ConfigEp3DmaMode(unsigned int bufAddr,unsigned int count);
 
 #endif

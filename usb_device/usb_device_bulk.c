@@ -2,6 +2,8 @@
 #include "s3c24xx.h"
 #include "usb_device_common.h"
 
+#if USB_DEVICE_BULK
+
 #define EP1_PKT_SIZE 64
 #define EP3_PKT_SIZE 64
 #define EP0_PKT_SIZE 8	
@@ -49,7 +51,6 @@ U8 ep1Buf[12] = "123456789012";
 void RdPktEp3_CheckSum(U8 *buf,int num)
 {
     int i;
-	
 	
     for(i=0;i<num;i++)
     {
@@ -162,7 +163,7 @@ void usb_dev_bulk_desc_table_init()
 
 
 
-void Ep0Handler()
+void UsbBulkEp0Handler()
 {	
     static int ep0State = EP0_STATE_INIT;
     static int ep0SubState;	
@@ -445,7 +446,7 @@ void Ep0Handler()
 	}
 }
 
-void Ep1Handler()
+void UsbBulkEp1Handler()
 {
     U8 in_csr1;
 
@@ -459,7 +460,7 @@ void Ep1Handler()
 		
 }
 
-void Ep3Handler()
+void UsbBulkEp3Handler()
 {
     U8 out_csr3;
     int fifoCnt;
@@ -511,7 +512,7 @@ void Ep3Handler()
     }	
 }
 
-void isr_usbd()
+void usb_bulk_isr_usbd()
 {	
     U8 usbdIntpnd,epIntpnd;
     U8 saveIndexReg = INDEX_REG;
@@ -542,72 +543,27 @@ void isr_usbd()
     {    	
         //DbgPrintf("[EP0]");
         EP_INT_REG = EP0_INT;  		//clear interrupt
-        Ep0Handler();
+        UsbBulkEp0Handler();
     }
 
 	if(epIntpnd & EP1_INT)
     {
         DbgPrintf("[EP1]");
         EP_INT_REG = EP1_INT;  
-        Ep1Handler();
+        UsbBulkEp1Handler();
     }
 
 	if(epIntpnd & EP3_INT)
     {
 		//DbgPrintf( "[EP3]");
         EP_INT_REG = EP3_INT;
-        Ep3Handler();
+        UsbBulkEp3Handler();
     }
 	INDEX_REG = saveIndexReg;
 }
 
-void ConfigEp3IntMode(void)
-{
-    INDEX_REG=3;
-    
-    DMASKTRIG2= (0<<1);  // EP3=DMA ch 2
-    //DMA channel off
-    OUT_CSR2_REG=OUT_CSR2_REG&~(EPO_AUTO_CLR/*|EPO_OUT_DMA_INT_MASK*/); 
-    //AUTOCLEAR off,interrupt_enabled (???)
-    EP3_DMA_UNIT=1;	
-    EP3_DMA_CON=0; 
-    // deamnd disable,out_dma_run=stop,in_dma_run=stop,DMA mode disable
-    //wait until DMA_CON is effective.
-    EP3_DMA_CON;
-    
-}
 
-void ClearEp3OutPktReady(void)
-{
-    U8 out_csr3;
-
-    INDEX_REG=3;
-    out_csr3= OUT_CSR1_REG;
-    CLR_EP3_OUT_PKT_READY();
-}
-
-void ConfigEp3DmaMode(unsigned int bufAddr,unsigned int count)
-{
-
-    printf("addr : 0x%x,count:%d\r\n", bufAddr,count);
-    count = count&0xfffff; 	//transfer size should be <1MB
-    OUT_CSR2_REG = OUT_CSR2_REG|EPO_AUTO_CLR|EPO_OUT_DMA_INT_MASK;  //EPO_AUTO_CLR need do here OUT_PKT_RDY auto clear used in dma
-
-	INDEX_REG=3;
-	DISRCC2 = (1<<1)|(1<<0); //increased source is APB
-    DISRC2 = 0x520001cc; 	//src=APB,fixed,src=EP3_FIFO
-    DIDSTC2=(0<<1)|(0<<0);  //fixed dest is AHB
-    DIDST2=bufAddr;       	//dst=bufAddr
-    DCON2=(count)|((unsigned int)1<<31)|(0<<30)|(1<<29)|(0<<28)|(0<<27)|(4<<24)|(1<<23)|(0<<22)|(0<<20); 
-	
-    EP3_DMA_UNIT = 0x01; //DMA transfer unit=1byte
-    EP3_DMA_CON = UDMA_OUT_DMA_RUN|UDMA_DMA_MODE_EN;  //ep3 dma mode  run
-
-	DMASKTRIG2= (1<<1);    //start dma2
-
-}
-
-void isr_dma2()
+void usb_bulk_isr_dma2()
 {
     U8 out_csr3;
 	
@@ -706,3 +662,5 @@ void usb_device_bulk_process()
 
 	
 }
+
+#endif

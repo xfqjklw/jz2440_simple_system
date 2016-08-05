@@ -4,7 +4,11 @@
 void EINT0_ISR()
 {
 	GPFDAT |= (0x7<<4); //close all led  
-	GPFDAT &= ~(1<<4);  //opem led1  
+	GPFDAT &= ~(1<<6);  //opem led1  
+
+	#if USB_DEVICE_MOUSE
+	usb_mouse_left_press();
+	#endif
 }
 
 
@@ -12,7 +16,12 @@ void EINT2_ISR()
 {
 	GPFDAT |= (0x7<<4); //close all led       
 	GPFDAT &= ~(1<<5);  //open led2
+	
+	#if USB_DEVICE_MOUSE
+	usb_mouse_right_press();
+	#endif
 }
+
 
 
 void EINT8_23_ISR()
@@ -20,10 +29,11 @@ void EINT8_23_ISR()
 	if(EINTPEND & (1<<11))
 	{
 		GPFDAT |= (0x7<<4); // close all led            
-		GPFDAT &= ~(1<<6);  // open led3     	
+		GPFDAT &= ~(1<<4);  // open led3     	
 		//clear interrupt
 		EINTPEND = (1<<11);   // EINT8_23ºÏÓÃIRQ5	
 	}
+	
 }
 
 #if UART_SEND_DMA
@@ -62,14 +72,21 @@ void DMA0_ISR()
 
 void DMA2_ISR()
 {
+	#if USB_DEVICE_BULK
 	#if USB_DEVICE_BULK_OUT_DMA
-	isr_dma2();
+	usb_bulk_isr_dma2();
+	#endif
 	#endif
 }
 
 void USBD_ISR()
 {
-	isr_usbd();
+	#if USB_DEVICE_BULK
+	usb_bulk_isr_usbd();
+	#endif
+	#if USB_DEVICE_MOUSE
+	usb_mouse_isr_usbd();
+	#endif
 }
 
 void UART0_ISR()

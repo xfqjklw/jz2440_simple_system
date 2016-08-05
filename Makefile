@@ -1,5 +1,5 @@
 objs := head.o nand.o main.o init.o interrupt.o led.o watchdog.o key.o uart.o timer.o rtc.o \
-		usb_device/usb_device_bulk.o usb_device/usb_device_common.o \
+		usb_device/usb_device_bulk.o usb_device/usb_device_common.o usb_device/usb_device_mouse.o\
 		printf/libc.a
 
 simple.bin: $(objs)

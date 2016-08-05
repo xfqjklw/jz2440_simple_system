@@ -22,6 +22,8 @@ void key_init()
 
 	//EINT0¡¢EINT2¡¢EINT8_23 enable
 	INTMSK   &= (~(1<<0)) & (~(1<<2)) & (~(1<<5));
+
+	EXTINT0 |= ((0x02) | (0x02<<8)); //fall edge 
 }
 
 

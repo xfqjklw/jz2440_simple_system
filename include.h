@@ -8,7 +8,10 @@
 #define UART_FIFO_RECV_INT 1  //use recv fifo and interrupt
 
 /*usb function*/
+#define USB_DEVICE_BULK  0
 #define USB_DEVICE_BULK_OUT_DMA 1
+
+#define USB_DEVICE_MOUSE 1
 
 /*uart api*/
 extern void uart0_init();
@@ -27,6 +30,16 @@ extern void timer1_init();
 extern void disable_watch_dog();
 
 /*usb*/
-extern void isr_usbd();
+extern void usb_bulk_isr_dma2();
+extern void usb_bulk_isr_usbd();
 extern void usb_device_bulk_init();
+extern void usb_device_bulk_process();
+
+extern void usb_device_mouse_init();
+extern void usb_mouse_isr_usbd();
+extern void usb_mouse_left_press();
+extern void usb_mouse_left_release();
+extern void usb_mouse_right_release();
+extern void usb_mouse_right_release();
+
 

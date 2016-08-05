@@ -58,6 +58,7 @@
 /*external interrupt registers*/
 #define EINTMASK            (*(volatile unsigned long *)0x560000a4)
 #define EINTPEND            (*(volatile unsigned long *)0x560000a8)
+#define EXTINT0				(*(volatile unsigned long *)0x56000088)
 
 /*clock registers*/
 #define	LOCKTIME		(*(volatile unsigned long *)0x4c000000)
@@ -201,5 +202,4 @@
 #define EP4_DMA_TTC_L     (*(volatile unsigned char *)0x52000264)	//EP4 DMA total Tx counter
 #define EP4_DMA_TTC_M     (*(volatile unsigned char *)0x52000268)
 #define EP4_DMA_TTC_H     (*(volatile unsigned char *)0x5200026c)
-
 
