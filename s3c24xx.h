@@ -7,11 +7,11 @@
 
 /* NAND Flash registers */
 #define NFCONF              (*(volatile unsigned int  *)0x4e000000)
-#define NFCMD               (*(volatile unsigned char *)0x4e000004)
-#define NFADDR              (*(volatile unsigned char *)0x4e000008)
-#define NFDATA              (*(volatile unsigned char *)0x4e00000c)
-#define NFSTAT              (*(volatile unsigned char *)0x4e000010)
-
+#define NFCONT              (*(volatile unsigned char *)0x4e000004)
+#define NFCMD              	(*(volatile unsigned char *)0x4e000008)
+#define NFADDR              (*(volatile unsigned char *)0x4e00000c)
+#define NFDATA              (*(volatile unsigned char *)0x4e000010)
+#define NFSTAT				(*(volatile unsigned char *)0x4E000020)
 /*GPIO registers*/
 #define GPBCON              (*(volatile unsigned long *)0x56000010)
 #define GPBDAT              (*(volatile unsigned long *)0x56000014)
@@ -32,6 +32,9 @@
 #define GPCDAT    			(*(volatile unsigned long *)0x56000024)	
 #define GPCUP     			(*(volatile unsigned long *)0x56000028)	
 
+#define GPECON    			(*(volatile unsigned long *)0x56000040)
+#define GPEDAT    		    (*(volatile unsigned long *)0x56000044)
+#define GPEUP     			(*(volatile unsigned long *)0x56000048)
 
 
 /*UART registers*/
@@ -202,4 +205,13 @@
 #define EP4_DMA_TTC_L     (*(volatile unsigned char *)0x52000264)	//EP4 DMA total Tx counter
 #define EP4_DMA_TTC_M     (*(volatile unsigned char *)0x52000268)
 #define EP4_DMA_TTC_H     (*(volatile unsigned char *)0x5200026c)
+
+/*iis*/
+#define IISCON 			  (*(volatile unsigned int *)0x55000000)
+#define IISMOD 			  (*(volatile unsigned int *)0x55000004)
+#define IISFCON 	      (*(volatile unsigned int *)0x5500000C)
+#define IISFIFO 		  (*(volatile unsigned int  *)0x55000010)
+#define IISPSR 			  (*(volatile unsigned int  *)0x55000008)
+
+
 

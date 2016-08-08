@@ -24,7 +24,12 @@ int main()
 	#if USB_DEVICE_MOUSE
 	usb_device_mouse_init();
 	#endif
-
+	
+	#if WM8976_TEST
+	wm8976_init();
+	music_play();
+	#endif
+	
  	while(1)
 	{	
 	

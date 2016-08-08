@@ -13,6 +13,9 @@
 
 #define USB_DEVICE_MOUSE 1
 
+/*wm8976 function*/
+#define WM8976_TEST 	1
+
 /*uart api*/
 extern void uart0_init();
 
