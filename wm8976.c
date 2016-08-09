@@ -156,19 +156,22 @@ void wm8976_reg_init()
     /* software reset */
     wm8976_write_reg(0, 0);
 
-  	
     wm8976_write_reg(0x3, 0x6f);/* OUT2的左/右声道打开     * 左/右通道输出混音打开     * 左/右DAC打开*/
     wm8976_write_reg(0x1, 0x1f);//biasen,BUFIOEN.VMIDSEL=11b  
-    wm8976_write_reg(0x2, 0x185);//ROUT1EN LOUT1EN, input PGA enable ,ADC enable
+    wm8976_write_reg(0x2, 0x185);//ROUT1 EN LOUT 1EN, input PGA enable ,ADC enable
 
     wm8976_write_reg(0x6, 0x0);//SYSCLK=MCLK divide by 1
     wm8976_write_reg(0x4, 0x10);//16bit i2s format
     wm8976_write_reg(0x2B,0x10);//BTL OUTPUT  
     wm8976_write_reg(0x9, 0x50);//Jack detect enable  gpio2 as jack detect input
-    wm8976_write_reg(0xD, 0x21);//Jack decet pin is 0,OUT1 enable,1 OUT2 enable
+    wm8976_write_reg(0xD, 0x21);//Jack decet pin is 0:OUT1 enable,1:OUT2 enable
     wm8976_write_reg(0x7, 0x01);//Jack detect slow clock enabled used for jack detect
     wm8976_write_reg(52, (1<<8)|57); //0db LOUT1 VOL
     wm8976_write_reg(53, (1<<8)|57); //0db ROUT1	VOL
+
+	#if WM8960_BYPASS_TEST
+	wm8976_write_reg(50, ((3<<2)| (1<<1)));
+	#endif
 	
 }
 

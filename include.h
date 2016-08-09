@@ -15,6 +15,7 @@
 
 /*wm8976 function*/
 #define WM8976_TEST 	1
+#define WM8960_BYPASS_TEST 1
 
 /*uart api*/
 extern void uart0_init();
