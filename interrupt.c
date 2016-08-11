@@ -125,6 +125,22 @@ void TICK_ISR()
 	printf("tick occur\r\n");
 }
 
+void ADC_ISR()
+{	
+	printf("adc isr\r\n");
+    if(SUBSRCPND & 0x1<<9)  //tc
+    {
+		Isr_Tc();
+		SUBSRCPND |= (0x1<<9);
+    }
+	if(SUBSRCPND & 0x1<<10) //rtc
+	{
+		Isr_Adc();
+		SUBSRCPND |= (0x1<<10);
+	}
+	
+}
+
 void IRQ_Handle()
 {
     unsigned long oft = INTOFFSET;
@@ -183,7 +199,13 @@ void IRQ_Handle()
 		}
 		case 30:
 		{
-			RTC_ISR();
+			RTC_ISR();			
+			break;
+		}
+		case 31:
+		{
+			ADC_ISR();
+			break;
 		}
 		default:            
 			break;   

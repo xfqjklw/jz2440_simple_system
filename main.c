@@ -32,7 +32,8 @@ int main()
 
 	//Test_Lcd_Tft_8bit_480272();
 	Test_Lcd_Tft_16Bit_480272();
-	
+
+	tc_test();
  	while(1)
 	{	
 	
