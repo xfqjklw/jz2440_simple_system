@@ -5,11 +5,17 @@ int main()
 	uart0_init();
 	led_init();
 	key_init();
-	//timer0_init();
-	//timer1_init();	
-	//rtc_init();
-	//rtc_alarm_init();
-	//rtc_tick_init();
+
+	#if TIMER_TEST
+	timer0_init();
+	timer1_init();	
+	#endif
+
+	#if RTC_TEST
+	rtc_init();
+	rtc_alarm_init();
+	rtc_tick_init();
+	#endif
 
 	printf("-------------------------------------------------\r\n");
 	printf("                system start %s               \r\n",VERSION);

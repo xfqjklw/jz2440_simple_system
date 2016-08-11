@@ -1,4 +1,4 @@
-#define OPENJTAG_DEBUG 1
+#define OPENJTAG_DEBUG 0
 
 .extern     main
 .text 
@@ -39,9 +39,8 @@ Reset:
   	bl copy_isr_talbe_to_sram
 	#else
 	/*if you want to debug on sdram,you should not copy code*/
-    //bl  nand_init
-    //bl  copy_nand_to_sdram
-	//bl copy_steppingstone_to_sdram
+    bl  nand_init
+    bl  copy_nand_to_sdram
 	#endif
 	
     msr cpsr_c, #0xd2        	@enter irq mode 

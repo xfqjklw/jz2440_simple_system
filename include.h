@@ -1,6 +1,6 @@
 #include "stdio.h"
 
-#define VERSION "v0.1"
+#define VERSION "v1.0"
 
 /*uart function*/
 #define UART_SEND_DMA 0
@@ -16,6 +16,10 @@
 /*wm8976 function*/
 #define WM8976_TEST 	0
 #define WM8960_BYPASS_TEST 1
+
+/*timer and rtc function*/
+#define TIMER_TEST 0
+#define RTC_TEST 0
 
 /*uart api*/
 extern void uart0_init();

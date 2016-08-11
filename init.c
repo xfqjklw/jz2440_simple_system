@@ -52,7 +52,7 @@ void copy_nand_to_sdram()
 {
 	unsigned int *Dest = (unsigned int *)0x30000000;
 
-	//nand_read(Dest,0,2048);
+	nand_read(Dest,0,2048*15);
 	
 }
 
