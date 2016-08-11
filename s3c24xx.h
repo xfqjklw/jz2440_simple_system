@@ -32,6 +32,10 @@
 #define GPCDAT    			(*(volatile unsigned long *)0x56000024)	
 #define GPCUP     			(*(volatile unsigned long *)0x56000028)	
 
+#define GPDCON              (*(volatile unsigned long *)0x56000030)
+#define GPDDAT              (*(volatile unsigned long *)0x56000034)
+#define GPDUP               (*(volatile unsigned long *)0x56000038)
+
 #define GPECON    			(*(volatile unsigned long *)0x56000040)
 #define GPEDAT    		    (*(volatile unsigned long *)0x56000044)
 #define GPEUP     			(*(volatile unsigned long *)0x56000048)
@@ -213,5 +217,24 @@
 #define IISFIFO 		  (*(volatile unsigned int  *)0x55000010)
 #define IISPSR 			  (*(volatile unsigned int  *)0x55000008)
 
+// LCD CONTROLLER
+#define LCDCON1     (*(volatile unsigned long *)0x4d000000) //LCD control 1
+#define LCDCON2     (*(volatile unsigned long *)0x4d000004) //LCD control 2
+#define LCDCON3     (*(volatile unsigned long *)0x4d000008) //LCD control 3
+#define LCDCON4     (*(volatile unsigned long *)0x4d00000c) //LCD control 4
+#define LCDCON5     (*(volatile unsigned long *)0x4d000010) //LCD control 5
+#define LCDSADDR1   (*(volatile unsigned long *)0x4d000014) //STN/TFT Frame buffer start address 1
+#define LCDSADDR2   (*(volatile unsigned long *)0x4d000018) //STN/TFT Frame buffer start address 2
+#define LCDSADDR3   (*(volatile unsigned long *)0x4d00001c) //STN/TFT Virtual screen address set
+#define REDLUT      (*(volatile unsigned long *)0x4d000020) //STN Red lookup table
+#define GREENLUT    (*(volatile unsigned long *)0x4d000024) //STN Green lookup table 
+#define BLUELUT     (*(volatile unsigned long *)0x4d000028) //STN Blue lookup table
+#define DITHMODE    (*(volatile unsigned long *)0x4d00004c) //STN Dithering mode
+#define TPAL        (*(volatile unsigned long *)0x4d000050) //TFT Temporary palette
+#define LCDINTPND   (*(volatile unsigned long *)0x4d000054) //LCD Interrupt pending
+#define LCDSRCPND   (*(volatile unsigned long *)0x4d000058) //LCD Interrupt source
+#define LCDINTMSK   (*(volatile unsigned long *)0x4d00005c) //LCD Interrupt mask
+#define LPCSEL      (*(volatile unsigned long *)0x4d000060) //LPC3600 Control
+#define PALETTE     0x4d000400                              //Palette start address
 
 

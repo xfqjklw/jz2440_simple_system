@@ -14,7 +14,7 @@
 #define USB_DEVICE_MOUSE 1
 
 /*wm8976 function*/
-#define WM8976_TEST 	1
+#define WM8976_TEST 	0
 #define WM8960_BYPASS_TEST 1
 
 /*uart api*/

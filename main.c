@@ -29,6 +29,9 @@ int main()
 	wm8976_init();
 	music_play();
 	#endif
+
+	//Test_Lcd_Tft_8bit_480272();
+	Test_Lcd_Tft_16Bit_480272();
 	
  	while(1)
 	{	
